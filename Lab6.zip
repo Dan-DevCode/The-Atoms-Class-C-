@@ -1,0 +1,108 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+
+class Atom
+{
+    public string Name { get; set; }
+    public string Symbol { get; set; }
+    public int Proton { get; set; }
+    public int Neutron { get; set; }
+    public double Weight { get; set; }
+
+    public Atom() { }
+
+    public Atom(string name, int proton, int neutron, double weight, string symbol)
+    {
+        Name = name;
+        Symbol = symbol;
+        Proton = proton;
+        Neutron = neutron;
+        Weight = weight;
+    }
+
+    public static Atom Parse(string line)
+    {
+        string[] parts = line.Split(' ');
+
+        if (parts.Length != 5)
+            throw new ArgumentException("Invalid input format");
+
+        return new Atom(parts[0], int.Parse(parts[1]), int.Parse(parts[2]), double.Parse(parts[3]), parts[4]);
+    }
+
+    public override string ToString()
+    {
+        return $"{Name} {Proton} {Neutron} {Weight} {Symbol}";
+    }
+}
+
+class Program
+{
+    static List<Atom> elements = new List<Atom>();
+
+    static void Main(string[] args)
+    {
+        AddElements();
+
+        DisplayAllElements();
+        SerializeFirstElement();
+        DeserializeAndDisplayFirstElement();
+        SerializeAllElements();
+        DeserializeAndDisplayAllElements();
+    }
+
+    static void AddElements()
+    {
+        elements.Add(Atom.Parse("Hydrogen 1 0 1.0079 H"));
+        elements.Add(Atom.Parse("Helium 2 2 4.0026 He"));
+        elements.Add(Atom.Parse("Lithium 3 4 6.941 Li"));
+        // Add the rest of the elements...
+    }
+
+    static void DisplayAllElements()
+    {
+        Console.WriteLine("All Elements:");
+        foreach (var element in elements)
+        {
+            Console.WriteLine(element.ToString());
+        }
+        Console.WriteLine();
+    }
+
+    static void SerializeFirstElement()
+    {
+        string jsonString = JsonSerializer.Serialize(elements[0]);
+        File.WriteAllText("first_element.json", jsonString);
+        Console.WriteLine("Serialized the first element and saved to 'first_element.json'");
+    }
+
+    static void DeserializeAndDisplayFirstElement()
+    {
+        string jsonString = File.ReadAllText("first_element.json");
+        Atom firstElement = JsonSerializer.Deserialize<Atom>(jsonString);
+        Console.WriteLine("Deserialized the first element:");
+        Console.WriteLine(firstElement.ToString());
+        Console.WriteLine();
+    }
+
+    static void SerializeAllElements()
+    {
+        string jsonString = JsonSerializer.Serialize(elements);
+        File.WriteAllText("all_elements.json", jsonString);
+        Console.WriteLine("Serialized all elements and saved to 'all_elements.json'");
+    }
+
+    static void DeserializeAndDisplayAllElements()
+    {
+        string jsonString = File.ReadAllText("all_elements.json");
+        List<Atom> allElements = JsonSerializer.Deserialize<List<Atom>>(jsonString);
+        Console.WriteLine("Deserialized all elements:");
+        foreach (var element in allElements)
+        {
+            Console.WriteLine(element.ToString());
+        }
+        Console.WriteLine();
+    }
+}
